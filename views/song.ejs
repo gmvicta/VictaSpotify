@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Now Playing: <%= song.title %></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            position: relative; 
+        }
+
+        .back-button {
+            position: absolute; 
+            top: 20px; 
+            left: 20px;
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px; 
+        }
+        .back-button i {
+            margin-right: 5px; 
+        }
+        .back-button:hover {
+            color: #1db954; 
+        }
+        .player {
+            width: 90%;
+            max-width: 500px;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            text-align: center; 
+        }
+
+        .cd-container {
+            width: 250px; 
+            height: 250px; 
+            border-radius: 50%; 
+            background: radial-gradient(circle, #999, #666); 
+            position: relative;
+            margin: 0 auto; 
+            animation: spin 10s linear infinite; 
+        }
+
+        .cd-cover {
+            width: 90%; 
+            height: 90%; 
+            border-radius: 50%; 
+            position: absolute;
+            top: 5%; 
+            left: 5%; 
+            overflow: hidden; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cover-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover; 
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px; 
+        }
+        .controls button {
+            background-color: transparent;
+            border: none;
+            color: #ffffff;
+            font-size: 24px;
+            margin: 0 10px;
+            cursor: pointer;
+        }
+        .controls button:hover {
+            color: #1db954; 
+        }
+        
+        .progress {
+            width: 100%;
+            height: 5px;
+            background: #555;
+            border-radius: 5px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #1db954;
+            width: 0;
+            border-radius: 5px;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .volume-control input {
+            margin-left: 10px;
+        }
+
+        .track-info {
+            text-align: center;
+        }
+        h1 {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+        h2 {
+            font-size: 20px;
+            color: #b3b3b3;
+            margin: 5px 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .action-buttons button {
+            background-color: #1db954;
+            border: none;
+            border-radius: 5px;
+            color: #ffffff;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+
+        .action-buttons button:hover {
+            background-color: #1aa34a;
+        }
+
+        .timer {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-button">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+    <div class="player">
+        <div class="cd-container">
+            <div class="cd-cover">
+                <img src="<%= song.cover_image %>" alt="<%= song.title %> cover" class="cover-image"> 
+            </div>
+        </div>
+        <div class="track-info">
+            <h1><%= song.title %></h1>
+            <h2>Artist: <%= song.artist %></h2>
+        </div>
+        <div class="controls">
+            <button id="prev"><i class="fas fa-backward"></i></button>
+            <button id="play"><i class="fas fa-play"></i></button>
+            <button id="pause" style="display: none;"><i class="fas fa-pause"></i></button>
+            <button id="next"><i class="fas fa-forward"></i></button>
+        </div>
+        
+        <div class="timer">
+            <span id="current-time">0:00</span> / <span id="duration">0:00</span>
+        </div>
+        <div class="progress" id="progress">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <div class="volume-control">
+            <label for="volume">Volume:</label>
+            <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+        </div>
+
+        <div class="action-buttons">
+            <button id="add-favorites">Add to Favorites</button>
+            <button id="save-playlist">Save to Playlist</button>
+            <button id="download">Download</button>
+        </div>
+
+        <audio id="audio">
+            <source src="<%= song.track_url %>" type="audio/mpeg"> 
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+    
+    <script>
+        const audio = document.getElementById('audio');
+        const playButton = document.getElementById('play');
+        const pauseButton = document.getElementById('pause');
+        const currentTimeDisplay = document.getElementById('current-time');
+        const durationDisplay = document.getElementById('duration');
+        const progress = document.getElementById('progress');
+        const progressFill = document.getElementById('progress-fill');
+        const volumeControl = document.getElementById('volume');
+
+        // Format time in mm:ss
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        // Update timer and progress bar
+        audio.addEventListener('loadedmetadata', () => {
+            durationDisplay.textContent = formatTime(audio.duration);
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            currentTimeDisplay.textContent = formatTime(audio.currentTime);
+            progressFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+        });
+
+        // Play and pause functionality
+        playButton.addEventListener('click', () => {
+            audio.play();
+            playButton.style.display = 'none';
+            pauseButton.style.display = 'block';
+        });
+
+        pauseButton.addEventListener('click', () => {
+            audio.pause();
+            pauseButton.style.display = 'none';
+            playButton.style.display = 'block';
+        });
+
+        // Volume control
+        volumeControl.addEventListener('input', () => {
+            audio.volume = volumeControl.value;
+        });
+
+        // Progress bar functionality
+        progress.addEventListener('click', (e) => {
+            const progressWidth = progress.offsetWidth;
+            const clickX = e.offsetX;
+            const newTime = (clickX / progressWidth) * audio.duration;
+            audio.currentTime = newTime;
+        });
+
+        // Non-functional buttons
+        document.getElementById('add-favorites').addEventListener('click', () => {
+            alert('Added to Favorites! (Functionality not implemented)');
+        });
+
+        document.getElementById('save-playlist').addEventListener('click', () => {
+            alert('Saved to Playlist! (Functionality not implemented)');
+        });
+
+        document.getElementById('download').addEventListener('click', () => {
+            alert('Download initiated! (Functionality not implemented)');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Clone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-papGFSwVO05zEoMpvCJ0Y+PPzVxNzgR+Uc8D+i+P+nQhNwDBqkF1z6xO0GvvNwX81xOyB9W3N9sFPxtbkVY2xw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
+            color: #fff;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        } 
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background-color: #040404;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar .logo i {
+            font-size: 32px;
+            color: #1DB954;
+            margin-right: 10px;
+        }
+
+        .sidebar .logo span {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .sidebar li {
+            padding: 15px 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar li:hover {
+            background-color: #282828;
+        }
+
+        .sidebar li i {
+            margin-right: 15px;
+            font-size: 18px;
+            width: 25px;
+            text-align: center;
+        }
+
+        .sidebar .playlist-btn {
+            background-color: transparent;
+            border: none;
+            color: #b3b3b3;
+            cursor: pointer;
+            padding: 10px 0;
+            text-align: left;
+            width: 100%;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar .playlist-btn:hover {
+            color: #1DB954;
+        }
+
+        .sidebar .playlist-btn i {
+            margin-right: 15px;
+        }
+
+        .sidebar .premium {
+            background-color: #1DB954;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 12px;
+            margin-top: 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar .premium i {
+            margin-right: 8px;
+        }
+
+        .sidebar .premium:hover {
+            background-color: #1ed760;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #282828;
+            padding: 15px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: #3E3E3E;
+            border-radius: 25px;
+            padding: 8px 15px;
+            width: 300px;
+            transition: width 0.3s;
+        }
+
+        .search-bar i {
+            color: #b3b3b3;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .search-bar input[type="text"] {
+            background-color: transparent;
+            border: none;
+            color: #fff;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .search-bar input::placeholder {
+            color: #b3b3b3;
+        }
+
+        .add-music-btn {
+            background-color: #1DB954; 
+            border: none; 
+            color: white; 
+            padding: 10px 20px; 
+            border-radius: 25px; 
+            cursor: pointer;
+            font-size: 14px; 
+            transition: background-color 0.3s; 
+            display: flex;
+            align-items: center;
+        }
+
+        .add-music-btn i {
+            margin-right: 8px;
+        }
+
+        .add-music-btn:hover {
+            background-color: #1ed760; 
+        }
+
+        /* Content Sections */
+        .content-section {
+            padding: 20px 40px;
+        }
+
+        .content-section h2 {
+            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: 500;
+        }
+
+        .playlist {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: #181818;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .card img {
+            width: 100%;
+            height: 150px; 
+            object-fit: cover;
+        }
+
+        .card .info {
+            padding: 15px;
+            flex-grow: 1;
+        }
+
+        .card .info h4 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card .info p {
+            font-size: 14px;
+            color: #b3b3b3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .play-button {
+            background-color: #1DB954; 
+            color: #fff;
+            padding: 10px 15px; 
+            border: none; 
+            border-radius: 0 0 8px 8px; 
+            text-align: center; 
+            font-size: 14px; 
+            transition: background-color 0.3s;
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .play-button i {
+            margin-right: 5px;
+        }
+
+        .play-button:hover {
+            background-color: #1ed760; 
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #282828;
+            padding: 15px 30px;
+            text-align: center;
+            position: fixed; 
+            bottom: 0; 
+            width: 100%;
+            color: #b3b3b3;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .footer .player-controls {
+            display: flex;
+            align-items: center;
+            width: 50%;
+        }
+
+        .footer .player-controls .album-cover {
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+
+        .footer .player-controls .song-info {
+            flex-grow: 1;
+        }
+
+        .footer .player-controls .song-info h4 {
+            font-size: 14px;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .footer .player-controls .song-info p {
+            font-size: 12px;
+            color: #b3b3b3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .footer .player-controls .controls {
+            display: flex;
+            align-items: center;
+            margin-left: 15px;
+        }
+
+        .footer .player-controls .controls i {
+            margin: 0 10px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .footer .player-controls .controls i:hover {
+            color: #1DB954;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 200; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%;
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.7);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #181818;
+            margin: 5% auto;
+            padding: 30px;
+            border: none;
+            width: 90%; 
+            max-width: 500px;
+            border-radius: 10px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            font-size: 20px;
+            color: #fff;
+        }
+
+        .modal-content input[type="text"], .modal-content input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
+            background-color: #3E3E3E;
+            color: #fff;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .modal-content input::placeholder {
+            color: #b3b3b3;
+        }
+
+        .modal-content button {
+            background-color: #1DB954;
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 14px;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .modal-content button:hover {
+            background-color: #1ed760;
+        }
+
+        .close {
+            color: #aaa;
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: white;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #121212; 
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #1DB954; 
+            border-radius: 10px;
+            border: 2px solid #121212;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 200px;
+                padding: 15px;
+            }
+
+            .sidebar .logo span {
+                font-size: 20px;
+            }
+
+            .sidebar li i {
+                font-size: 16px;
+                width: 20px;
+            }
+
+            .sidebar .playlist-btn span {
+                font-size: 14px;
+            }
+
+            .sidebar .premium {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            .header {
+                padding: 10px 20px;
+            }
+
+            .search-bar {
+                width: 250px;
+            }
+
+            .content-section {
+                padding: 15px 20px;
+            }
+
+            .footer .player-controls .album-cover {
+                width: 40px;
+                height: 40px;
+            }
+
+            .footer .player-controls .controls i {
+                margin: 0 8px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+                padding: 15px;
+            }
+
+            .sidebar .logo span {
+                display: none;
+            }
+
+            .sidebar ul li span {
+                display: none;
+            }
+
+            .sidebar .playlist-btn span {
+                display: none;
+            }
+
+            .sidebar .premium {
+                display: none;
+            }
+
+            .header {
+                padding: 10px 15px;
+            }
+
+            .search-bar {
+                width: 200px;
+            }
+
+            .content-section {
+                padding: 10px 15px;
+            }
+
+            .footer .player-controls .song-info h4,
+            .footer .player-controls .song-info p {
+                display: none;
+            }
+
+            .footer .player-controls .controls {
+                margin-left: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-bar {
+                width: 150px;
+            }
+
+            .add-music-btn {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+
+            .footer .player-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .footer .player-controls .controls {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <div class="sidebar">
+            <div>
+                <div class="logo">
+                    <i class="fab fa-spotify"></i>
+                    <span>Spotify</span>
+                </div>
+                <ul>
+                    <li>
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-book"></i>
+                        <span>Your Library</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-history"></i>
+                        <span>Recently Played</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Create Playlist</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-heart"></i>
+                        <span>Liked Songs</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-podcast"></i>
+                        <span>Your Episodes</span>
+                    </li>
+                </ul>
+                <button class="premium"><i class="fas fa-star"></i> Premium</button>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search for songs, artists, etc.">
+                </div>
+                
+                <button id="openModalBtn" class="add-music-btn"><i class="fas fa-plus"></i> Add Music</button>
+            </div>
+            <div class="content-section">
+                <h2>Featured Playlists</h2>
+                <div class="playlist" id="playlist">
+                    <% songs.forEach(song => { %>
+                        <div class="card">
+                            <img src="<%= song.cover_image %>" alt="<%= song.title %> cover" class="cover-image">
+                            <div class="info">
+                                <h4><%= song.title %></h4>
+                                <p><%= song.artist %></p>
+                            </div>
+                            <a href="/song/<%= song.id %>" class="play-button"><i class="fas fa-play"></i> Play</a>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <div class="player-controls">
+            <img src="https://via.placeholder.com/50x50.png?text=Album" alt="Album Cover" class="album-cover">
+            <div class="song-info">
+                <h4>Song Title</h4>
+                <p>Artist Name</p>
+            </div>
+            <div class="controls">
+                <i class="fas fa-random"></i>
+                <i class="fas fa-step-backward"></i>
+                <i class="fas fa-play-circle"></i>
+                <i class="fas fa-step-forward"></i>
+                <i class="fas fa-redo"></i>
+            </div>
+        </div>
+    </div>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Music</h2>
+            <form id="musicForm" action="/upload" method="POST" enctype="multipart/form-data">
+                <div>
+                    <input type="text" id="title" name="title" placeholder="Title" required>
+                </div>
+                <div>
+                    <input type="text" id="artist" name="artist" placeholder="Artist" required>
+                </div>
+                <div>
+                    <input type="file" id="musicFile" name="songFile" accept="audio/*" required>
+                </div>
+                <div>
+                    <input type="file" id="coverImage" name="imageFile" accept="image/*" placeholder="Cover Image (Optional)">
+                </div>
+                <div>
+                    <button type="submit">Add Music</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+
+    <!-- MODAL JS -->
+    <script>
+        var modal = document.getElementById("myModal");
+        var btns = document.querySelectorAll("#openModalBtn");
+        var span = document.getElementsByClassName("close")[0];
+        btns.forEach(btn => {
+            btn.onclick = function() {
+                modal.style.display = "block";
+            }
+        });
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+
+</body>
+</html>
